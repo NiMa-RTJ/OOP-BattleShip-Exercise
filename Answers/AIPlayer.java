@@ -8,8 +8,9 @@ public class AIPlayer extends Player {
 
         boolean canShot = true;
 
+
        while (canShot) {
-            String target = makeMove();
+           String target = makeMove();
            int row = Integer.parseInt(target.substring(1));
            int col = target.charAt(0) - 'A';
 

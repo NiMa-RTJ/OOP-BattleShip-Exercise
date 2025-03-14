@@ -14,6 +14,8 @@ public class Game {
 
     static AIPlayer aiPlayer = new AIPlayer();
 
+    static SpecialAttack sAttack = new SpecialAttack();
+
     static Board Player_1_Grid = new Board();
 
     static Board Player_2_Grid = new Board();
@@ -25,6 +27,8 @@ public class Game {
     static Board aiGrid = new Board();
 
     static Board AIView = new Board();
+
+    static String[] gameStatus = {" "};
 
     void playAgainstAI() {
 
@@ -38,22 +42,38 @@ public class Game {
         placeShips.randomPlacement(10,aiGrid.getGrid());
 
         boolean player1Turn = true;
+        int counter1 = 0;
+        int counter2 =0;
 
         while (!isGameOver(Player_1_Grid.getGrid(), aiGrid.getGrid())) {
             if (player1Turn) {
                 print.printTitle(player1.getPlayer()+ " Turn");
-                print.printGrid(viewBoard1.getGrid());
-                playGame(aiGrid.getGrid(), viewBoard1.getGrid());
+                if (shipSunkCount(Player_1_Grid.getGrid()) < 7 && counter1==0) {
+                    sAttack.specialAttackMenu(true, aiGrid.getGrid(), viewBoard1.getGrid());
+                    counter1++;
+                }
+                else  {
+                    print.printGrid(viewBoard1.getGrid());
+                    playGame(aiGrid.getGrid(), viewBoard1.getGrid());
+                }
                 player1Turn = false;
             }
             else {
                 print.printTitle(aiPlayer.getPlayer() + " Turn");
-                print.printGrid(AIView.getGrid());
-                aiPlayer.playAI(AIView.getGrid(), Player_1_Grid.getGrid());
+                if (shipSunkCount(aiGrid.getGrid()) < 7 && counter2==0) {
+                    sAttack.specialAttackMenu(false, Player_1_Grid.getGrid(), AIView.getGrid());
+                    counter2++;
+                }
+                else {
+                    print.printGrid(AIView.getGrid());
+                    aiPlayer.playAI(AIView.getGrid(), Player_1_Grid.getGrid());
+                }
                 player1Turn = true;
             }
-
         }
+        if (gameStatus[0].equals("Player 1 Lose")) print.printTitle("AI Won");
+        else print.printTitle(player1.getPlayer() + "Won");
+
     }
 
     void twoPlayerMode() {
@@ -67,26 +87,41 @@ public class Game {
         player2Start();
 
         boolean player1Turn = true;
+        int counter1 = 0;
+        int counter2 =0;
 
-        while (!isGameOver(Player_2_Grid.getGrid(),Player_2_Grid.getGrid())) {
+        while (!isGameOver(Player_1_Grid.getGrid(),Player_2_Grid.getGrid())) {
             if (player1Turn) {
                 print.printTitle(player1.getPlayer() + " Turn");
-                print.printGrid(viewBoard1.getGrid());
-                playGame(Player_2_Grid.getGrid(), viewBoard1.getGrid());
+                if (shipSunkCount(Player_1_Grid.getGrid()) < 7 && counter1==0) {
+                    sAttack.specialAttackMenu(true, Player_2_Grid.getGrid(), viewBoard1.getGrid());
+                    counter1++;
+                }
+                else {
+                    print.printGrid(viewBoard1.getGrid());
+                    playGame(Player_2_Grid.getGrid(), viewBoard1.getGrid());
+                }
                 player1Turn = false;
             }
             else {
                 print.printTitle(player2.getPlayer() + " Turn");
-                print.printGrid(viewBoard2.getGrid());
-                playGame(Player_1_Grid.getGrid(), viewBoard2.getGrid());
+                if (shipSunkCount(Player_2_Grid.getGrid()) < 7 && counter2==0) {
+                    sAttack.specialAttackMenu(true, Player_1_Grid.getGrid(), viewBoard2.getGrid());
+                    counter2++;
+                }
+                else {
+                    print.printGrid(viewBoard2.getGrid());
+                    playGame(Player_1_Grid.getGrid(), viewBoard2.getGrid());
+                }
                 player1Turn = true;
             }
-
         }
+        if (gameStatus[0].equals("Player 1 Lose")) print.printTitle(player2.getPlayer() + "Won");
+        else print.printTitle(player1.getPlayer() + "Won");
 
     }
 
-    private void playGame(char[][] enemyGrid,char[][] grid) {
+    void playGame(char[][] enemyGrid,char[][] grid) {
 
         Scanner input = new Scanner(System.in);
         boolean canShot = true;
@@ -201,18 +236,32 @@ public class Game {
     }
 
     boolean isGameOver(char[][] grid1, char[][] grid2) {
-        return allShipSunk(grid1) || allShipSunk(grid2);
+        int num1 = 1;
+        int num2 = 2;
+        return allShipSunk(grid1,num1) || allShipSunk(grid2,num2);
     }
 
-    boolean allShipSunk(char[][] grid) {
+    boolean allShipSunk(char[][] grid, int num) {
 
         for (int i=0; i<10; i++) {
             for (int j=0; j<10; j++) {
                 if (grid[i][j] == 'S') return false;
             }
         }
+        if (num==1) gameStatus[0] = "Player 1 Lose";
         return true;
+    }
 
+    int shipSunkCount(char[][] grid) {
+
+        int count = 0;
+
+        for (int i=0; i<10; i++) {
+            for (int j=0; j<10; j++) {
+                if (grid[i][j]=='S') count++;
+            }
+        }
+        return count;
     }
 
 }
